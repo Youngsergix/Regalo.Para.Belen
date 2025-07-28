@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Regalo para Belén</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #e6ccf5;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+    }
+
+    .gift {
+      width: 160px;
+      height: 160px;
+      background: linear-gradient(135deg, #ffc8dd 25%, #fae1dd 100%);
+      border: 5px solid #ffb3c6;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.4s ease;
+    }
+
+    .gift:hover {
+      transform: scale(1.05);
+    }
+
+    .gift::before, .gift::after {
+      content: '';
+      position: absolute;
+      background-color: #ff6f91;
+    }
+
+    .gift::before {
+      width: 100%;
+      height: 20px;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+
+    .gift::after {
+      height: 100%;
+      width: 20px;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+    }
+
+    .bow {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 30px;
+    }
+
+    .bow span {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: #ff6f91;
+      border-radius: 50%;
+    }
+
+    .bow span:first-child {
+      left: 0;
+    }
+
+    .bow span:last-child {
+      right: 0;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .card {
+      background: #fff0f6;
+      color: #5e548e;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      max-width: 320px;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 1s ease;
+      z-index: 2;
+      margin-top: 20px;
+    }
+
+    .card.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .turntable {
+      margin-top: 30px;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: #000;
+      position: relative;
+      animation: spin 5s linear infinite;
+      box-shadow: inset 0 0 10px #fff;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .turntable::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      background: #ffb3c6;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .arm {
+      width: 4px;
+      height: 70px;
+      background: #333;
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: rotate(30deg);
+      transform-origin: top center;
+      border-radius: 2px;
+      z-index: 3;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg);}
+      to { transform: rotate(360deg);}
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="container">
+    <!-- 🎁 Regalo -->
+    <div class="gift" id="gift" onclick="openGift()">
+      <div class="bow">
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <!-- 💌 Carta -->
+    <div class="card" id="card">
+      <p>
+        Hoy en tu cumpleaños no tuve la suerte de poder verte,<br>
+        pero sé con certeza que te veías hermosa,<br>
+        desde la distancia siempre estaré acompañándote.<br><br>
+        <strong>Te quiero, Belén</strong>.
+      </p>
+    </div>
+
+    <!-- 📻 Tocadiscos con ENLACE FUNCIONAL -->
+    <a href="https://www.youtube.com/watch?v=W8A1gsor-MU&list=RDW8A1gsor-MU&start_radio=1" target="_blank" style="text-decoration: none;">
+      <div class="turntable">
+        <div class="arm"></div>
+      </div>
+    </a>
+  </div>
+
+  <script>
+    function openGift() {
+      document.getElementById("gift").style.display = "none";
+      document.getElementById("card").classList.add("show");
+      launchConfetti();
+    }
+
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    let confetti = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function launchConfetti() {
+      confetti = [];
+      for (let i = 0; i < 150; i++) {
+        confetti.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          dx: (Math.random() - 0.5) * 10,
+          dy: (Math.random() - 0.5) * 10,
+          size: Math.random() * 6 + 4,
+          color: `hsl(${Math.random() * 360}, 100%, 80%)`,
+          alpha: 1
+        });
+      }
+      animateConfetti();
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confetti.forEach((c) => {
+        c.x += c.dx;
+        c.y += c.dy;
+        c.alpha -= 0.01;
+        ctx.fillStyle = c.color;
+        ctx.globalAlpha = c.alpha;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.size, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      confetti = confetti.filter(c => c.alpha > 0);
+      if (confetti.length > 0) {
+        requestAnimationFrame(animateConfetti);
+      }
+    }
+  </script>
+</body>
+</html>
